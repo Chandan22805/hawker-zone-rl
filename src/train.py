@@ -1,5 +1,5 @@
 from stable_baselines3 import DQN
-from src.hawker_env import HawkerZoneEnv
+from hawker_env import HawkerZoneEnv
 
 env = HawkerZoneEnv()
 model = DQN("MlpPolicy", env, verbose=1)

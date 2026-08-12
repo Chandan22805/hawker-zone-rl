@@ -1,6 +1,7 @@
 from src.hawker_env import HawkerZoneEnv
 
 env = HawkerZoneEnv()
+env.load_real_footfall("g_north_footfall_grid.npy")
 obs, info = env.reset()
 print("Initial obs shape:", obs.shape)
 
