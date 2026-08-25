@@ -2,3 +2,6 @@ gymnasium
 stable-baselines3
 numpy 
 matplotlib
+geopandas
+osmnx
+shapely
