@@ -1,4 +1,4 @@
 gymnasium
-stable-baseline3
+stable-baselines3
 numpy 
 matplotlib
