@@ -22,7 +22,7 @@ model = DQN.load("hawker_dqn_gnorth")
 obs, info = env.reset()
 
 for step in range(env.n_stalls):
-    q_values = model.q_net(model.policy.obs_to_tensor(obs)[0]).detach().numpy()[0]
+    q_values = model.q_net(model.policy.obs_to_tensor(obs)[0]).detach().cpu().numpy()[0]
     q_values[(env.legal.flatten() == 0) | (env.occupied.flatten() == 1)] = -np.inf
     action = int(np.argmax(q_values))
     obs, reward, terminated, truncated, info = env.step(action)
