@@ -5,3 +5,4 @@ matplotlib
 geopandas
 osmnx
 shapely
+python-dotenv
