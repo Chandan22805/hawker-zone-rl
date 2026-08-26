@@ -1,0 +1,14 @@
+{
+  "cell_size_degrees": 0.00015,
+  "grid_shape": [
+    300,
+    270
+  ],
+  "total_states": 81000,
+  "building_cells": 15130,
+  "road_cells": 11526,
+  "water_cells": 2884,
+  "railway_cells": 3185,
+  "footway_cells": 1182,
+  "legal_cells": 8458
+}
