@@ -6,7 +6,7 @@ from hawker_env import HawkerZoneEnv
 load_dotenv()
 device = os.getenv("DEVICE", "cpu").strip().lower()
 
-WARD_NAMES = ["G/N", "F/N"]
+WARD_NAMES = ["G/N", "F/N", "G/S"]
 CELL_SIZE_DEG = 0.00045
 ward_tag = "_".join(w.replace("/", "") for w in WARD_NAMES).lower()
 cell_size_label = format(CELL_SIZE_DEG, "g")

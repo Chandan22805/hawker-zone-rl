@@ -7,7 +7,7 @@ from shapely.geometry import Point, box
 
 # G/N is combined with its longest-bordering neighbor, F/N, into one
 # contiguous study area for grid generation.
-WARD_NAMES = ["G/N", "F/N"]
+WARD_NAMES = ["G/N", "F/N", "G/S"]
 ward_tag = "_".join(w.replace("/", "") for w in WARD_NAMES).lower()
 
 wards = gpd.read_file("docs/mumbai_wards.geojson")

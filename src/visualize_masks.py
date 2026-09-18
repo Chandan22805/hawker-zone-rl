@@ -23,7 +23,7 @@ BLOCKED_ROAD_TYPES = {
     "primary_link", "secondary", "secondary_link", "tertiary",
     "tertiary_link", "unclassified", "residential", "service", "living_street",
 }
-DEFAULT_WARDS = ["G/N", "F/N"]
+DEFAULT_WARDS = ["G/N", "F/N", "G/S"]
 
 
 def has_type(value, accepted):
