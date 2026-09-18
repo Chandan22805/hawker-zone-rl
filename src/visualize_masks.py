@@ -23,7 +23,7 @@ BLOCKED_ROAD_TYPES = {
     "primary_link", "secondary", "secondary_link", "tertiary",
     "tertiary_link", "unclassified", "residential", "service", "living_street",
 }
-DEFAULT_WARDS = ["G/N", "F/N", "G/S"]
+DEFAULT_WARDS = ["G/N", "F/N", "G/S", "F/S"]
 
 
 def has_type(value, accepted):
@@ -207,7 +207,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--cell-size",
         type=float,
-        default=0.00045,
+        default=0.00035,
         help="Cell width/height in degrees (default: 0.00045)",
     )
     parser.add_argument(

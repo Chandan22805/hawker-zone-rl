@@ -8,7 +8,7 @@ from shapely.geometry import box
 
 # G/N is combined with its longest-bordering neighbor, F/N, into one
 # contiguous study area for grid generation.
-WARD_NAMES = ["G/N", "F/N", "G/S"]
+WARD_NAMES = ["G/N", "F/N", "G/S", "F/S"]
 ward_tag = "_".join(w.replace("/", "") for w in WARD_NAMES).lower()
 
 wards = gpd.read_file("docs/mumbai_wards.geojson")
@@ -30,7 +30,7 @@ water = ox.features_from_polygon(
 railways = ox.features_from_polygon(boundary_polygon, tags={"railway": True})
 
 minx, miny, maxx, maxy = boundary_polygon.bounds
-cell_size_deg = 0.00045
+cell_size_deg = 0.00035
 
 cell_size_label = format(cell_size_deg, "g")
 OUTPUT_DIR = "footfall_grid_data"
