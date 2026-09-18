@@ -23,9 +23,12 @@ road_points = roads_all[roads_all.geometry.type == "Point"]
 
 minx, miny, maxx, maxy = boundary_polygon.bounds
 
-env = HawkerZoneEnv(n_stalls=100)
+TRAINED_STALLS = 100  # stall count the model file was trained/saved with
+PLACE_STALLS = 100  # stall count to actually place at inference; can differ from TRAINED_STALLS
+
+env = HawkerZoneEnv(n_stalls=PLACE_STALLS, max_steps=PLACE_STALLS)  # inference always picks valid cells, so steps == stalls placed
 env.load_real_footfall(f"footfall_grid_data/{ward_tag}_data_{cell_size_label}.npz")
-model = DQN.load(os.path.join("models", f"hawker_dqn_{ward_tag}_{cell_size_label}_stalls{env.n_stalls}"))
+model = DQN.load(os.path.join("models", f"hawker_dqn_{ward_tag}_{cell_size_label}_stalls{TRAINED_STALLS}"))
 obs, info = env.reset()
 
 for step in range(env.n_stalls):
