@@ -39,32 +39,67 @@ for step in range(env.n_stalls):
 
 print(f"Placed {len(env.placed_cells)} stalls")
 
-fig, ax = plt.subplots(figsize=(10, 10))
-buildings.plot(ax=ax, color="#c9c9c9", edgecolor="none", zorder=1)
-road_lines.plot(ax=ax, color="#555555", linewidth=0.6, zorder=2)
-road_points.plot(ax=ax, color="#888888", markersize=3, zorder=2)
-gpd.GeoSeries([boundary_polygon]).boundary.plot(ax=ax, color="black", linewidth=1.5, zorder=3)
-
 cell_size_deg = (maxx - minx) / env.footfall.shape[1]
 stall_lons = [minx + (j + 0.5) * cell_size_deg for i, j in env.placed_cells]
 stall_lats = [miny + (i + 0.5) * cell_size_deg for i, j in env.placed_cells]
-ax.scatter(stall_lons, stall_lats, c="green", s=12, marker="s", label="Vendor stall", zorder=4)
 
-ax.set_xlim(minx, maxx)
-ax.set_ylim(miny, maxy)
-ax.set_title("G North Ward: Vendor Placement on Real Map")
-ax.legend()
-ax.set_xticks([])
-ax.set_yticks([])
 
-plt.tight_layout()
+def draw_placement_panel(ax):
+    buildings.plot(ax=ax, color="#c9c9c9", edgecolor="none", zorder=1)
+    road_lines.plot(ax=ax, color="#555555", linewidth=0.6, zorder=2)
+    road_points.plot(ax=ax, color="#888888", markersize=3, zorder=2)
+    gpd.GeoSeries([boundary_polygon]).boundary.plot(ax=ax, color="black", linewidth=1.5, zorder=3)
+    ax.scatter(stall_lons, stall_lats, c="green", s=12, marker="s", label="Vendor stall", zorder=4)
+    ax.set_xlim(minx, maxx)
+    ax.set_ylim(miny, maxy)
+    ax.set_title("Vendor Placement on Real Map")
+    ax.legend()
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+
+def draw_legal_mask_panel(ax):
+    buildings.plot(ax=ax, color="#c9c9c9", edgecolor="none", zorder=1)
+    road_lines.plot(ax=ax, color="#555555", linewidth=0.6, zorder=2)
+    road_points.plot(ax=ax, color="#888888", markersize=3, zorder=2)
+    gpd.GeoSeries([boundary_polygon]).boundary.plot(ax=ax, color="black", linewidth=1.5, zorder=3)
+    legal_mask = env.legal
+    ax.imshow(
+        np.ma.masked_where(legal_mask == 0, legal_mask),
+        origin="lower",
+        extent=(minx, maxx, miny, maxy),
+        cmap="Greens",
+        vmin=0,
+        vmax=1,
+        interpolation="none",
+        alpha=0.45,
+        zorder=2.5,
+    )
+    ax.set_xlim(minx, maxx)
+    ax.set_ylim(miny, maxy)
+    ax.set_title(f"Legal Mask Over Map | {int(legal_mask.sum())} cells")
+    ax.set_xticks([])
+    ax.set_yticks([])
+
 
 results_dir = os.path.join(
     "visualizations", ward_tag, f"cell_size_{cell_size_label}", "results"
 )
 os.makedirs(results_dir, exist_ok=True)
-output_path = os.path.join(results_dir, "result.png")
 
+fig, ax = plt.subplots(figsize=(10, 10))
+draw_placement_panel(ax)
+plt.tight_layout()
+output_path = os.path.join(results_dir, "result.png")
 plt.savefig(output_path, dpi=150)
 print(f"Saved: {output_path}")
+
+eval_fig, eval_axes = plt.subplots(1, 2, figsize=(20, 10), constrained_layout=True)
+draw_placement_panel(eval_axes[0])
+draw_legal_mask_panel(eval_axes[1])
+eval_fig.suptitle(f"{' + '.join(WARD_NAMES)} | stalls = {env.n_stalls} | cell size = {CELL_SIZE_DEG} degrees")
+eval_output_path = os.path.join(results_dir, "result_eval.png")
+eval_fig.savefig(eval_output_path, dpi=150)
+print(f"Saved: {eval_output_path}")
+
 plt.show()
