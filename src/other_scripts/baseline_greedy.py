@@ -1,5 +1,5 @@
 import numpy as np
-from hawker_env import HawkerZoneEnv
+from src.hawker_env import HawkerZoneEnv
 
 WARD_NAMES = ["G/N", "F/N"]
 CELL_SIZE_DEG = 0.00045
