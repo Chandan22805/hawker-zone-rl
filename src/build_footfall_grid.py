@@ -2,8 +2,9 @@ import os
 import geopandas as gpd
 import osmnx as ox
 import numpy as np
+import shapely
 from shapely.ops import unary_union
-from shapely.geometry import Point, box
+from shapely.geometry import box
 
 # G/N is combined with its longest-bordering neighbor, F/N, into one
 # contiguous study area for grid generation.
@@ -67,38 +68,52 @@ footway_rows = roads[roads["highway"].apply(
     )
 )]
 
-for i in range(n_rows):
-    for j in range(n_cols):
-        cell_minx = minx + j * cell_size_deg
-        cell_miny = miny + i * cell_size_deg
-        cell_center = Point(cell_minx + 0.5 * cell_size_deg, cell_miny + 0.5 * cell_size_deg)
-        cell_polygon = box(
-            cell_minx,
-            cell_miny,
-            cell_minx + cell_size_deg,
-            cell_miny + cell_size_deg,
-        )
-        if boundary_polygon.contains(cell_center):
-            legal_mask[i, j] = 1
+# --- Vectorized grid classification -----------------------------------
+# Build every cell center in one shot and test containment with a single
+# vectorized shapely call instead of a Python-level double loop.
+row_idx, col_idx = np.meshgrid(np.arange(n_rows), np.arange(n_cols), indexing="ij")
+row_idx = row_idx.ravel()
+col_idx = col_idx.ravel()
 
-            # Use cell-center classification, consistent with the existing
-            # ward-boundary logic and the footfall assignment below.
-            if buildings.geometry.intersects(cell_polygon).any():
-                building_mask[i, j] = 1
+center_x = minx + (col_idx + 0.5) * cell_size_deg
+center_y = miny + (row_idx + 0.5) * cell_size_deg
+centers = shapely.points(center_x, center_y)
 
-            if road_rows.geometry.intersects(cell_polygon).any():
-                road_mask[i, j] = 1
+inside = shapely.contains(boundary_polygon, centers)
+legal_mask[row_idx[inside], col_idx[inside]] = 1
 
-            # Footways and pedestrian paths are kept as possible candidate
-            # locations. They are not included in road_mask above.
-            if footway_rows.geometry.intersects(cell_polygon).any():
-                footway_mask[i, j] = 1
+# Only build/test cell polygons for cells that are actually inside the
+# boundary (mirrors the original behavior: outside cells stay 0 everywhere).
+legal_row_idx = row_idx[inside]
+legal_col_idx = col_idx[inside]
+legal_minx = minx + legal_col_idx * cell_size_deg
+legal_miny = miny + legal_row_idx * cell_size_deg
+cell_polygons = shapely.box(
+    legal_minx, legal_miny,
+    legal_minx + cell_size_deg, legal_miny + cell_size_deg,
+)
+cells_gdf = gpd.GeoDataFrame(
+    {"row": legal_row_idx, "col": legal_col_idx},
+    geometry=cell_polygons,
+    crs=wards.crs,
+)
 
-            if water.geometry.intersects(cell_polygon).any():
-                water_mask[i, j] = 1
 
-            if railways.geometry.intersects(cell_polygon).any():
-                railway_mask[i, j] = 1
+def mark_intersecting_cells(mask, layer_gdf):
+    """Spatial-join (STRtree-indexed) instead of per-cell .intersects().any()."""
+    if layer_gdf.empty:
+        return
+    hits = gpd.sjoin(cells_gdf, layer_gdf[["geometry"]], predicate="intersects", how="inner")
+    mask[hits["row"].to_numpy(), hits["col"].to_numpy()] = 1
+
+
+mark_intersecting_cells(building_mask, buildings)
+mark_intersecting_cells(road_mask, road_rows)
+# Footways and pedestrian paths are kept as possible candidate locations.
+# They are not included in road_mask above.
+mark_intersecting_cells(footway_mask, footway_rows)
+mark_intersecting_cells(water_mask, water)
+mark_intersecting_cells(railway_mask, railways)
 
 legal_mask[
     (building_mask == 1)
@@ -117,11 +132,13 @@ legal_mask[
     & (railway_mask == 0)
 ] = 1
 
-for _, poi in pois.iterrows():
-    col = int((poi.geometry.x - minx) / cell_size_deg)
-    row = int((poi.geometry.y - miny) / cell_size_deg)
-    if 0 <= row < n_rows and 0 <= col < n_cols:
-        footfall_grid[row, col] += 1
+# --- Vectorized footfall counting ---------------------------------------
+poi_x = pois.geometry.x.to_numpy()
+poi_y = pois.geometry.y.to_numpy()
+poi_col = ((poi_x - minx) / cell_size_deg).astype(int)
+poi_row = ((poi_y - miny) / cell_size_deg).astype(int)
+valid = (poi_row >= 0) & (poi_row < n_rows) & (poi_col >= 0) & (poi_col < n_cols)
+np.add.at(footfall_grid, (poi_row[valid], poi_col[valid]), 1)
 
 max_count = footfall_grid.max()
 footfall_grid_normalized = footfall_grid / max_count if max_count > 0 else footfall_grid
