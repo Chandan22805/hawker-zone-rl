@@ -1,11 +1,18 @@
+import os
 import geopandas as gpd
 import osmnx as ox
 import numpy as np
+from shapely.ops import unary_union
 from shapely.geometry import Point, box
 
+# G/N is combined with its longest-bordering neighbor, F/N, into one
+# contiguous study area for grid generation.
+WARD_NAMES = ["G/N", "F/N"]
+ward_tag = "_".join(w.replace("/", "") for w in WARD_NAMES).lower()
+
 wards = gpd.read_file("docs/mumbai_wards.geojson")
-g_north = wards[wards["name"] == "G/N"]
-boundary_polygon = g_north.geometry.iloc[0]
+selected_wards = wards[wards["name"].isin(WARD_NAMES)]
+boundary_polygon = unary_union(selected_wards.geometry)
 
 pois = ox.features_from_polygon(boundary_polygon, tags={"shop": True, "amenity": True})
 pois = pois[pois.geometry.type == "Point"]
@@ -22,7 +29,11 @@ water = ox.features_from_polygon(
 railways = ox.features_from_polygon(boundary_polygon, tags={"railway": True})
 
 minx, miny, maxx, maxy = boundary_polygon.bounds
-cell_size_deg = 0.0001
+cell_size_deg = 0.00045
+
+cell_size_label = format(cell_size_deg, "g")
+OUTPUT_DIR = "footfall_grid_data"
+OUTPUT_PATH = f"{OUTPUT_DIR}/{ward_tag}_data_{cell_size_label}.npz"
 
 n_cols = int((maxx - minx) / cell_size_deg) + 1
 n_rows = int((maxy - miny) / cell_size_deg) + 1
@@ -115,8 +126,9 @@ for _, poi in pois.iterrows():
 max_count = footfall_grid.max()
 footfall_grid_normalized = footfall_grid / max_count if max_count > 0 else footfall_grid
 
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 np.savez(
-    "docs/g_north_data.npz",
+    OUTPUT_PATH,
     footfall=footfall_grid_normalized,
     legal=legal_mask,
     building=building_mask,
@@ -125,6 +137,7 @@ np.savez(
     railway=railway_mask,
     footway=footway_mask,
 )
+print(f"Saved: {OUTPUT_PATH}")
 print(f"Grid shape: {footfall_grid_normalized.shape}")
 print(f"Legal cells: {int(legal_mask.sum())} / {legal_mask.size}")
 print(f"Blocked by buildings: {int(building_mask.sum())}")

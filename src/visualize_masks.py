@@ -13,6 +13,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
 import osmnx as ox
+from shapely.ops import unary_union
 from shapely.geometry import Point, box
 
 
@@ -22,6 +23,7 @@ BLOCKED_ROAD_TYPES = {
     "primary_link", "secondary", "secondary_link", "tertiary",
     "tertiary_link", "unclassified", "residential", "service", "living_street",
 }
+DEFAULT_WARDS = ["G/N", "F/N"]
 
 
 def has_type(value, accepted):
@@ -29,12 +31,13 @@ def has_type(value, accepted):
     return any(item in accepted for item in values)
 
 
-def build_masks(cell_size):
+def build_masks(cell_size, ward_names):
     wards = gpd.read_file("docs/mumbai_wards.geojson")
-    ward = wards[wards["name"] == "G/N"]
-    if ward.empty:
-        raise ValueError("Could not find ward named G/N")
-    boundary = ward.geometry.iloc[0]
+    selected = wards[wards["name"].isin(ward_names)]
+    missing = set(ward_names) - set(selected["name"])
+    if missing:
+        raise ValueError(f"Could not find ward(s) named {sorted(missing)}")
+    boundary = unary_union(selected.geometry)
 
     buildings = ox.features_from_polygon(boundary, tags={"building": True})
     roads = ox.features_from_polygon(boundary, tags={"highway": True})
@@ -97,10 +100,10 @@ def build_masks(cell_size):
     }, (minx, miny, maxx, maxy)
 
 
-def plot_masks(cell_size, output, overlay_output):
+def plot_masks(cell_size, output, overlay_output, ward_names):
     os.makedirs(os.path.dirname(output) or ".", exist_ok=True)
     os.makedirs(os.path.dirname(overlay_output) or ".", exist_ok=True)
-    boundary, buildings, roads, footways, water, railways, masks, bounds = build_masks(cell_size)
+    boundary, buildings, roads, footways, water, railways, masks, bounds = build_masks(cell_size, ward_names)
     minx, miny, maxx, maxy = bounds
     panels = [
         ("Buildings", masks["building"], "Reds"),
@@ -128,8 +131,9 @@ def plot_masks(cell_size, output, overlay_output):
         ax.set_xlabel("Longitude")
         ax.set_ylabel("Latitude")
 
+    ward_label = " + ".join(ward_names)
     fig.suptitle(
-        f"G/North physical masks | cell size = {cell_size} degrees | "
+        f"{ward_label} physical masks | cell size = {cell_size} degrees | "
         f"grid = {masks['legal'].shape[0]} × {masks['legal'].shape[1]}"
     )
     fig.savefig(output, dpi=180)
@@ -172,7 +176,7 @@ def plot_masks(cell_size, output, overlay_output):
         overlay_ax.set_ylabel("Latitude")
 
     overlay_fig.suptitle(
-        f"G/North mask overlays | cell size = {cell_size} degrees",
+        f"{ward_label} mask overlays | cell size = {cell_size} degrees",
         fontsize=14,
     )
     overlay_fig.savefig(overlay_output, dpi=180)
@@ -216,11 +220,18 @@ if __name__ == "__main__":
         default=None,
         help="Output path for the mask overlay map",
     )
+    parser.add_argument(
+        "--wards",
+        default=",".join(DEFAULT_WARDS),
+        help=f"Comma-separated ward names to combine (default: {','.join(DEFAULT_WARDS)})",
+    )
     args = parser.parse_args()
     if args.cell_size <= 0:
         parser.error("--cell-size must be greater than zero")
+    ward_names = [w.strip() for w in args.wards.split(",") if w.strip()]
+    ward_tag = "_".join(w.replace("/", "") for w in ward_names).lower()
     cell_size_label = format(args.cell_size, "g")
-    output_dir = os.path.join("visualizations", f"cell_size_{cell_size_label}")
+    output_dir = os.path.join("visualizations", ward_tag, f"cell_size_{cell_size_label}")
     output = args.output or os.path.join(output_dir, "masks_visualization.png")
     overlay_output = args.overlay_output or os.path.join(output_dir, "masks_overlay_map.png")
-    plot_masks(args.cell_size, output, overlay_output)
+    plot_masks(args.cell_size, output, overlay_output, ward_names)
