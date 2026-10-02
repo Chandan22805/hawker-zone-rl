@@ -1,12 +1,14 @@
 import numpy as np
 from src.hawker_env import HawkerZoneEnv
 
-WARD_NAMES = ["G/N", "F/N"]
-CELL_SIZE_DEG = 0.00045
+WARD_NAMES = ["G/N", "F/N", "G/S", "F/S"]
+CELL_SIZE_DEG = 0.00035
 ward_tag = "_".join(w.replace("/", "") for w in WARD_NAMES).lower()
 cell_size_label = format(CELL_SIZE_DEG, "g")
 
-env = HawkerZoneEnv(n_stalls=25)
+PLACE_STALLS = 100  # match PLACE_STALLS in visualize_real.py for a fair comparison
+
+env = HawkerZoneEnv(n_stalls=PLACE_STALLS, max_steps=PLACE_STALLS)
 env.load_real_footfall(f"footfall_grid_data/{ward_tag}_data_{cell_size_label}.npz")
 obs, info = env.reset()
 
