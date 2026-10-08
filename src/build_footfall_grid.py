@@ -3,6 +3,7 @@ import geopandas as gpd
 import osmnx as ox
 import numpy as np
 import shapely
+from scipy.ndimage import gaussian_filter
 from shapely.ops import unary_union
 from shapely.geometry import box
 
@@ -30,7 +31,7 @@ water = ox.features_from_polygon(
 railways = ox.features_from_polygon(boundary_polygon, tags={"railway": True})
 
 minx, miny, maxx, maxy = boundary_polygon.bounds
-cell_size_deg = 0.00035
+cell_size_deg = 0.00025
 
 cell_size_label = format(cell_size_deg, "g")
 OUTPUT_DIR = "footfall_grid_data"
@@ -139,6 +140,18 @@ poi_col = ((poi_x - minx) / cell_size_deg).astype(int)
 poi_row = ((poi_y - miny) / cell_size_deg).astype(int)
 valid = (poi_row >= 0) & (poi_row < n_rows) & (poi_col >= 0) & (poi_col < n_cols)
 np.add.at(footfall_grid, (poi_row[valid], poi_col[valid]), 1)
+
+# Shops are almost always mapped inside a building, but buildings are
+# illegal cells — so raw per-cell counts leave nearly every legal cell at
+# exactly 0, even ones right next to a busy shop. Smooth each shop's
+# contribution outward (highest at the shop, fading with distance) so
+# nearby legal street/footway cells inherit a realistic nonzero score
+# instead of only the (illegal) cell the shop point happens to sit in.
+SMOOTHING_RADIUS_METERS = 75  # roughly a couple of city blocks
+meters_per_deg_lat = 111_320
+cell_size_meters = cell_size_deg * meters_per_deg_lat
+smoothing_sigma_cells = SMOOTHING_RADIUS_METERS / cell_size_meters
+footfall_grid = gaussian_filter(footfall_grid, sigma=smoothing_sigma_cells)
 
 max_count = footfall_grid.max()
 footfall_grid_normalized = footfall_grid / max_count if max_count > 0 else footfall_grid

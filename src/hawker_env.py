@@ -3,10 +3,16 @@ import gymnasium as gym
 from gymnasium import spaces
 
 class HawkerZoneEnv(gym.Env):
-    def __init__(self, n_stalls=15, max_steps=100):
+    def __init__(self, n_stalls=15, max_steps=100, spread_penalty_weight=1.0):
         super().__init__()
         self.n_stalls = n_stalls
         self.max_steps = max_steps
+        # Weight applied to the *normalized* spread penalty (bounding-box area
+        # divided by total grid area, so it's always in a 0-1 range like
+        # footfall_score, regardless of grid size). Keeping both terms on the
+        # same scale is what makes the reward comparable across differently
+        # sized cities/grids.
+        self.spread_penalty_weight = spread_penalty_weight
         self._loaded = False
 
     def load_real_footfall(self, npz_path):
@@ -50,7 +56,11 @@ class HawkerZoneEnv(gym.Env):
             else:
                 spread_penalty = 0
 
-            reward = footfall_score - 0.02 * spread_penalty
+            # Normalize by total grid area so this stays in a 0-1 range
+            # comparable to footfall_score, regardless of how big the grid is.
+            spread_penalty_ratio = spread_penalty / (self.rows * self.cols)
+
+            reward = footfall_score - self.spread_penalty_weight * spread_penalty_ratio
             self.current_stall += 1
 
         if self.current_stall >= self.n_stalls:

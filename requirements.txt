@@ -1,6 +1,7 @@
 gymnasium
 stable-baselines3
-numpy 
+numpy
+scipy
 matplotlib
 geopandas
 osmnx

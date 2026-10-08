@@ -207,7 +207,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--cell-size",
         type=float,
-        default=0.00035,
+        default=0.00025,
         help="Cell width/height in degrees (default: 0.00045)",
     )
     parser.add_argument(
