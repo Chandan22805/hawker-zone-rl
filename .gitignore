@@ -4,3 +4,4 @@ __pycache__/
 /.idea
 .env
 /models
+/sliding_window/models

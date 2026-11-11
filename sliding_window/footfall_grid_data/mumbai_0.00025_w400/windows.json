@@ -1,0 +1,132 @@
+{
+  "city": "mumbai",
+  "cell_size_deg": 0.00025,
+  "window_cells": 400,
+  "stride_cells": 400,
+  "windows": [
+    {
+      "id": "r00_c00",
+      "row": 0,
+      "col": 0,
+      "origin_lon": 72.77633295153348,
+      "origin_lat": 18.89395643371942,
+      "built": true,
+      "inside_cells": 52433,
+      "legal_cells": 13468,
+      "trainable": true
+    },
+    {
+      "id": "r00_c01",
+      "row": 0,
+      "col": 1,
+      "origin_lon": 72.87633295153347,
+      "origin_lat": 18.89395643371942,
+      "built": true,
+      "inside_cells": 72,
+      "legal_cells": 60,
+      "trainable": false
+    },
+    {
+      "id": "r00_c02",
+      "row": 0,
+      "col": 2,
+      "origin_lon": 72.97633295153348,
+      "origin_lat": 18.89395643371942,
+      "built": false,
+      "trainable": false
+    },
+    {
+      "id": "r01_c00",
+      "row": 1,
+      "col": 0,
+      "origin_lon": 72.77633295153348,
+      "origin_lat": 18.993956433719422,
+      "built": true,
+      "inside_cells": 81315,
+      "legal_cells": 17568,
+      "trainable": true
+    },
+    {
+      "id": "r01_c01",
+      "row": 1,
+      "col": 1,
+      "origin_lon": 72.87633295153347,
+      "origin_lat": 18.993956433719422,
+      "built": true,
+      "inside_cells": 105466,
+      "legal_cells": 37529,
+      "trainable": true
+    },
+    {
+      "id": "r01_c02",
+      "row": 1,
+      "col": 2,
+      "origin_lon": 72.97633295153348,
+      "origin_lat": 18.993956433719422,
+      "built": false,
+      "trainable": false
+    },
+    {
+      "id": "r02_c00",
+      "row": 2,
+      "col": 0,
+      "origin_lon": 72.77633295153348,
+      "origin_lat": 19.09395643371942,
+      "built": true,
+      "inside_cells": 118933,
+      "legal_cells": 37724,
+      "trainable": true
+    },
+    {
+      "id": "r02_c01",
+      "row": 2,
+      "col": 1,
+      "origin_lon": 72.87633295153347,
+      "origin_lat": 19.09395643371942,
+      "built": true,
+      "inside_cells": 135469,
+      "legal_cells": 59916,
+      "trainable": true
+    },
+    {
+      "id": "r02_c02",
+      "row": 2,
+      "col": 2,
+      "origin_lon": 72.97633295153348,
+      "origin_lat": 19.09395643371942,
+      "built": false,
+      "trainable": false
+    },
+    {
+      "id": "r03_c00",
+      "row": 3,
+      "col": 0,
+      "origin_lon": 72.77633295153348,
+      "origin_lat": 19.19395643371942,
+      "built": true,
+      "inside_cells": 99306,
+      "legal_cells": 30138,
+      "trainable": true
+    },
+    {
+      "id": "r03_c01",
+      "row": 3,
+      "col": 1,
+      "origin_lon": 72.87633295153347,
+      "origin_lat": 19.19395643371942,
+      "built": true,
+      "inside_cells": 35888,
+      "legal_cells": 33764,
+      "trainable": true
+    },
+    {
+      "id": "r03_c02",
+      "row": 3,
+      "col": 2,
+      "origin_lon": 72.97633295153348,
+      "origin_lat": 19.19395643371942,
+      "built": false,
+      "trainable": false
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+2 windows of 400x400 cells planned
+  r00_c00: building...
+    https://overpass-api.de/api failed (ResponseStatusCodeError, attempt 1), finding a server...
+    no OSM server answering, checking again in 3s
+    no OSM server answering, checking again in 3s
+    no OSM server answering, checking again in 3s
+    no OSM server answering, checking again in 3s
+    no OSM server answering, checking again in 3s
+    no OSM server answering, checking again in 3s
+    switched to https://maps.mail.ru/osm/tools/overpass/api
+Saved: C:\Users\ratul\PycharmProjects\hawker-zone-rl\sliding_window_vijayawada\footfall_grid_data\vijayawada_0.00025_w400\windows.json
+2 built, 2 trainable (>= 200 legal cells)
+  r00_c00: 14120 legal / 83353 inside city
+  r01_c00: 203 legal / 546 inside city

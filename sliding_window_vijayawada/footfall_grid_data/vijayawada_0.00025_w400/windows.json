@@ -1,0 +1,30 @@
+{
+  "city": "vijayawada",
+  "cell_size_deg": 0.00025,
+  "window_cells": 400,
+  "stride_cells": 400,
+  "windows": [
+    {
+      "id": "r00_c00",
+      "row": 0,
+      "col": 0,
+      "origin_lon": 80.5866909,
+      "origin_lat": 16.4783125,
+      "built": true,
+      "inside_cells": 83353,
+      "legal_cells": 18337,
+      "trainable": true
+    },
+    {
+      "id": "r01_c00",
+      "row": 1,
+      "col": 0,
+      "origin_lon": 80.5866909,
+      "origin_lat": 16.578312500000003,
+      "built": true,
+      "inside_cells": 546,
+      "legal_cells": 203,
+      "trainable": true
+    }
+  ]
+}

@@ -2,6 +2,7 @@ gymnasium
 stable-baselines3
 numpy
 scipy
+scikit-learn
 matplotlib
 geopandas
 osmnx

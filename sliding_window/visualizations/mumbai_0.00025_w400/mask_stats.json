@@ -1,0 +1,12 @@
+{
+  "building_cells": 26149,
+  "road_cells": 26000,
+  "footway_cells": 2622,
+  "water_cells": 539,
+  "railway_cells": 4114,
+  "legal_cells": 13468,
+  "windows_built": 1,
+  "windows_trainable": 2,
+  "window_cells": 400,
+  "cell_size_degrees": 0.00025
+}
